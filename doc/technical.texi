@@ -1,0 +1,279 @@
+@node Technical Info, Top, Top, Top
+@chapter Technical Information
+
+This chapter contains information, how the decompiler works.
+
+@menu
+* Types::
+* Expression analysis::
+* Flow analysis::
+* Solving unknown stack-ops::
+* Highlevel analysis::
+@end menu
+
+@node Types, Expression analysis, Technical Info, Technical Info
+@section Type checking and guessing
+@cindex Types, Conversions
+
+The class jode.Type is the base class of all types (except MethodType).
+A type under jode is really a set of types, since it sometimes cannot
+know the exact type.  A special type is Type.tError which represents the
+empty set and means, that something has gone wrong.
+
+A type has the following operators:
+
+@table @asis
+@item getSubType
+Get the set of types, that are implicitly castable to one of the types
+in this type set.  
+
+@item getSuperType
+Get the set of types, to which the types in this type set can be casted
+without a bytecode cast.
+
+@item intersection
+Get the intersection of the type sets.
+
+(getCastHelper?)
+(getImplicitCast?)
+@end table
+
+There are simple types, that can only casted to themself (like long,
+float, double, void), 32 bit integer types (boolean, byte, char, short,
+int) and reference types (classes, interfaces, arrays and null type).
+There is also a type range to represent sets of reference types.
+
+createRangeType
+getSpecializedType
+getGeneralizedType
+
+The meaning is  
+ref1.intersection(ref2) = 
+ ref1.getSpecializedType(ref2).createRangeType(ref1.getGeneralizedType(ref2))
+
+<Object - NULL>
+<Object[] - NULL>
+<Object[] - Serialized[]>
+<tUnknown[]>
+<Object - tUnknown[]>
+{IBCS}[]  intersect {CSZ}[] = {CS}[]
+<Object - {ICSB}[]> intersect <Serializable - {CSZ}[]>
+   --> <Serializable - {CS}[]>
+
+The byte code distinguishes five different types:
+
+@enumerate
+@item 16 bit integral types (boolean, byte, short, char and int)
+@item long
+@item float
+@item double
+@item reference types (objects, interfaces, arrays, null type)
+@end enumerate
+
+It sometimes makes a difference between byte, short, char and int, but
+not always.
+
+
+16bit integral types:
+
+We differ seven different 16 bit integral types:
+@table @asis
+@item I
+@code{int} type
+@item C
+@code{char} type
+@item S
+@code{short} type
+@item B
+@code{byte} type
+@item Z
+@code{boolean} type
+@item cS
+An @code{int} constant whose value is in @code{short} range.
+@item cB
+An @code{int} constant whose value is in @code{byte} range.
+@end table
+
+Each of this types has a super range and a sub range:
+@multitable {type} {(I,C,S,B,Z,cS,cB)} {(I,C,S,B,Z,cS,cB)}
+@item type @tab sub types @tab super types
+@item I    @tab (I,C,S,B,cS,cB) @tab (I)
+@item C    @tab (C)             @tab (I,C)
+@item S    @tab (S,B,cS,cB)     @tab (I,S)
+@item B    @tab (B,cB)          @tab (I,S,B)
+@item Z    @tab (Z)             @tab (Z)
+@item cS   @tab (cS,cB)         @tab (I,S,cS)
+@item cB   @tab (cB)            @tab (I,S,B,cS,cB)
+@end multitable
+
+getTop() getBottom() give the type directly.
+
+createRangeType(Type bottom) does the following:
+If top == tUnknown , union all supertypes
+If top is 16bit type, 
+ intersect (union of subtypes of top) (union of supertypes)
+Return tError otherwise.
+
+Type.createRangeType(Type top) does the following:
+if Type == tUnknown
+  if top is IntegerType
+    new IntegerType(union of subtypes of top)
+
+
+
+
+
+Hints.  We distinguish strong and weak Hints:
+
+strong Hints:
+   assignment:  
+     lhs.strongHint = mergeHint(lhs.strongHint, rhs.strongHint)
+     lhs.weakHint   = mergeHint(lhs.weakHint,   rhs.weakHint)
+     rhs.strongHint = lhs.strongHint
+     
+   
+   binary op:
+     left.weakHint = mergeHints(left.weakHint, right.strongHint?strongHint: weakHint)
+     
+   binary op
+types that may occur directly in bytecode:
+  (I,Z)
+  (I)
+  (Z)
+  (I,C,S,B,Z)
+  (I,cS,cB)
+  (I,cS)
+  (I,C,cS,cB)
+  (I,C,cS)
+  (I,C)
+  (C)
+  (S)
+  (B)
+  (B,Z)
+
+now the sub (>) and super (<) operators
+
+  >(I,Z) = (I,C,S,B,Z,cS,cB) New!
+  >(I)   = (I,C,S,B,cS,cB)   New!
+  >(Z)   = (Z)
+  >(I,C,S,B,Z) = (I,C,S,B,Z,cS,cB)
+  >(I,cS,cB)   = (I,C,S,B,cS,cB)
+  >(I,cS)      = (I,C,S,B,cS,cB)
+  >(I,C,cS,cB) = (I,C,S,B,cS,cB)
+  >(I,C,cS)    = (I,C,S,B,cS,cB)
+  >(I,C)       = (I,C,S,B,cS,cB)
+  >(C)         = (C)
+  >(S)         = (S,B,cS,cB) New!
+  >(B)         = (B,cB)      New!
+  >(B,Z)       = (B,Z,cB) New!
+
+  <(I,Z) = (I,Z)
+  <(I)   = (I)
+  <(Z)   = (Z)
+  <(I,C,S,B,Z) = (I,C,S,B,Z)
+  <(I,cS,cB)   = (I,S,B,cS,cB)   New!
+  <(I,cS)      = (I,S,cS)        New!
+  <(I,C,cS,cB) = (I,C,S,B,cS,cB)
+  <(I,C,cS)    = (I,C,S,cS)      New!
+  <(I,C)       = (I,C)
+  <(C)         = (I,C)
+  <(S)         = (I,S)           New!
+  <(B)         = (I,S,B)         New!
+  <(B,Z)       = (I,S,B,Z)  New!
+
+  >(I,C,S,B,Z,cS,cB) = (I,C,S,B,Z,cS,cB)
+  >(I,C,S,B,cS,cB) = (I,C,S,B,cS,cB)
+  >(B,Z,cB)   = (B,Z,cB)
+  >(I,C,S,cS) = (I,C,S,B,cS,cB)
+  >(I,S,B,Z)  = (I,C,S,B,Z,cS,cB)
+  >(I,S,B,cS,cB)  = (I,C,S,B,cS,cB)
+
+  <(I,C,S,B,Z,cS,cB) = (I,C,S,B,Z,cS,cB)
+  <(I,C,S,B,cS,cB)   = (I,C,S,B,cS,cB)
+  <(B,Z,cB)          = (I,S,B,Z,cS,cB)
+  <(I,C,S,cS)        = (I,C,S,cS)
+  <(I,S,B,Z)         = (I,S,B,Z)
+  <(I,S,B,cS,cB)     = (I,S,B,cS,cB)
+  
+
+Zu betrachtende 32bit Typen:
+
+  (I,Z)              = (I,Z)
+  (I)                = (I)
+  (Z)                = (Z)
+  (I,C,S,B,Z)
+  (I,cS,cB)
+  (I,cS)
+  (I,C,cS,cB)
+  (I,C,cS)
+  (I,C)
+  (B,Z)
+  (I,C,S,B,Z,cS,cB)
+  (I,C,S,B,cS,cB)
+  (B,Z,cB)
+  (I,C,S,cS)
+  (I,S,B,Z)
+  (I,S,B,cS,cB)
+
+@node Highlevel analysis, Technical Info, Solving unknown stack-ops, Technical Info
+@section Highlevel analysis
+@cindex passes
+
+@section The passes
+
+JODE works in three passes:
+
+@subsection Pass 1: Initialize
+
+In the initialize pass the methods, fields and inner classes are read in
+and the inner classes are recursively initialized.  In this pass the
+complexity of the class is calculated.  Anonymous and method scoped
+classes aren't even considered yet.
+
+@subsection Pass 2: Analyze
+
+The analyze pass is the real decompilation pass: The code of the methods
+is transformed into flow blocks and merged to one flow block as
+described in a previous section.  The in/out analysis for the local
+variables is completed, and the locals are merged as necessary.  The
+parameter 0 for non static method is marked as ThisOperator in this
+pass.  
+
+The constructors are analyzed first.  If they initialize synthetic
+fields, this is taken as clear sign that this are outer value
+parameters.  So afterwards, these synthetic fields know their value.
+
+Then the methods are analyzed.  Each method remembers the anonymous
+classes it creates for Pass 3, but these classes are not yet
+initialized.  Inner classes aren't analyzed yet, either.
+
+@subsection Pass 3: Analyze Inner
+
+As the name of this pass makes clear the inner classes are initialized
+in this pass, i.e. first Pass 2 and 3 are invoked for the inner classes.
+
+After that the method scoped classes are analyzed: For each constructor
+it is first check if one surrounding method knows about it.  If not, a
+new class analyzer is created for the method scoped class and Pass 1--3
+are invoked.  Every surrounding method is then told about this new class
+analyzer.
+
+After this pass, every anonymous constructor is analyzed, so we know
+which constructor parameters can be outer values.  The constructor
+transformation may force some other outer values, though.  It is also
+known, in which method a method scoped class must be declared.
+
+@subsection Pass 4: Make Declarations
+
+The last pass begins with transforming the constructors of a class.  Now
+the outer values are fixed and the constructor parameters and synthetic
+fields are told their values.
+
+After that every method determines where to declare local variables and
+method scoped classes.  Local variables are declared as final if a
+method scoped class uses it as outer value.   The name of local
+variables is guessed now.
+
+This pass is done recursively for inner and method scoped classes. 
+
+

@@ -1,0 +1,11 @@
+\input texinfo @c -*- texinfo -*-
+
+@setfilename jode.info
+@settitle Jode, a Java Decompiler
+@direntry
+* Jode: (jode).                 A Java Decompiler
+@end direntry
+
+
+@include technical.texi
+@bye

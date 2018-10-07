@@ -1,0 +1,40 @@
+#!/bin/sh
+
+OLDDIR=`pwd`
+TIME=`date +"%Y%m%d %H:%M"`
+if [ "${1#-D}" != "$1" ] ; then
+    TIME=`date +"%Y%m%d %H:%M" --date="${1#-D}"`
+    shift;
+fi
+DATE=`echo $TIME | cut -c0-8`
+echo $TIME
+echo $DATE
+
+TEMP=`mktemp -d $HOME/tmp.XXXXXX`
+
+trap "cd $OLDDIR; rm -rf $TEMP" EXIT
+cd $TEMP
+
+CLASSPATH=$TEMP:/usr/local/swing-1.1/swing.jar
+export CLASSPATH
+
+cvs export -D"$TIME" jode
+cd jode
+perl -i -pe's/(snapshot )[0-9]+/${1}'"$TIME"'/ 
+            if /public final static String version/;'  GlobalOptions.java
+
+COMPILER=${1:-jikes}
+if [ -z "$1" ]; then 
+    FLAGS="-g"
+else 
+    shift
+    FLAGS="$*"
+fi
+
+# jasmin -d .. jvm/Interpreter.j
+
+eval $COMPILER $FLAGS -d .. \
+   Decompiler.java obfuscator/Main.java JodeApplet.java swingui/Main.java
+
+cd ..
+zip -r $HOME/jode-$DATE.zip jode

@@ -1,0 +1,563 @@
+2005-10-14  Jochen Hoenicke  <jochen@gnu.org>
+
+	* src/net/sf/jode/flow/TransformConstructor.java:
+	(lookForConstructorCall) Check for isStatic before setting
+	outer $this reference 
+	(reported by Andreas Salathé, bug #1306688)
+
+2005-09-13  Jochen Hoenicke  <jochen@gnu.org>
+
+	Check for NullPointer in SyntheticAnalyzer.  Based on
+	patch suggessted by Peter Klauser (klp at users.sf.net).
+
+	* src/net/sf/jode/jvm/SyntheticAnalyzer.java:
+	(checkStaticAccess): Check refField for null pointer.
+	(checkAccess): Likewise.
+
+2004-08-06  Jochen Hoenicke  <hoenicke@marge.Informatik.Uni-Oldenburg.DE>
+
+	* src/net/sf/jode/bytecode/BinaryInfo.java (ACC_*): added 
+	constants describing modifier attributes.
+	* src/net/sf/jode/bytecode/BasicBlockReader.java
+	(convertHandlers): remove empty handlers.
+	(readCode): merge adjacent try-blocks (splitted by javac-1.4
+	return rule).
+	* src/net/sf/jode/bytecode/FieldInfo.java (syntheticFlag):
+	removed, use modifier and ACC_SYNTHETIC (new in java 5) instead.
+	Changed all usages.  When writing it currently writes out both
+	old and new synthetic format.
+	(getSignature): New method to return full generic signature.
+	* src/net/sf/jode/bytecode/MethodInfo.java
+	(syntheticFlag, getSignature): likewise.
+	* src/net/sf/jode/bytecode/ClassInfo.java (getSignature): 
+	New method to return full generic signature.
+	* src/net/sf/jode/decompiler/MethodAnalyzer.java (skipWriting):
+	Skip java 5 bridge methods.
+	* src/net/sf/jode/expr/InvokeOperator.java (getClassAnalyzer):
+	Check for null callee.
+	* src/net/sf/jode/expr/FlowBlock.java (analyze): New order for
+	T1,T2 analysis:  Do not do T1 analysis when the block has more
+	than one real successor and the next block can be easily merged.
+	See comment for more information.
+	
+2004-08-05  Jochen Hoenicke  <hoenicke@marge.Informatik.Uni-Oldenburg.DE>
+
+	* build.xml: replace execon with apply.
+	* src/net/sf/jode/bytecode/ClassInfo.java (readAttributes):
+	read in signature attribute (not yet published, though).
+	* src/net/sf/jode/bytecode/MethodInfo.java (readAttributes):
+	likewise.
+	* src/net/sf/jode/bytecode/FieldInfo.java (readAttributes):
+	likewise.
+	* src/net/sf/jode/bytecode/ClassInfo.java (mergeModifiers):
+	only check the traditional modifiers for equality.
+	* src/net/sf/jode/bytecode/ConstantPool.java (getConstant):
+	Support for CLASS constants (jdk1.5) added.
+	* src/net/sf/jode/bytecode/BasicBlockReader.java (readCode):
+	opc_ldc, opc_ldc_w: Support for CLASS constants added.
+	* src/net/sf/jode/decompiler/Opcodes.java (addOpcode):
+	likewise.
+	* src/net/sf/jode/expr/InvokeOperator.java 
+	(simplifyStringBuffer, simplifyString):
+	Also handle StringBuilder (jdk1.5).
+	* src/net/sf/jode/type/Type.java (tStringBuilder): new field.
+	* src/net/sf/jode/swingui/Main.java (main): handle debug
+	options.
+
+
+2004-01-31  Jochen Hoenicke  <hoenicke@informatik.uni-oldenburg.de>
+
+	* src/net/sf/jode/jvm/SyntheticAnalyzer.java (checkGetClass):
+	Handle jdk1.4 class$ methods.
+
+	* src/net/sf/jode/jvm/RuntimeEnvironment.java: Fixed some javadocs.
+	* src/net/sf/jode/flow/CompleteSynchronized.java: likewise.
+	* src/net/sf/jode/flow/CreateExpression.java: likewise.
+	* src/net/sf/jode/flow/CreateIfThenElseOperator.java: likewise.
+
+	Added changes (except obfuscator changes) from jode-1.1 tree up to
+	2001-07-08
+
+	* src/net/sf/jode/bytecode/ClassInfo.java (deprecatedFlag): Added
+	flag for deprecated classes. Stuart Ballard noticed that this was
+	missing.
+	(readAttribute): Read deprecated attribute.
+	(prepareWriting): Prepare deprecated attribute.
+	(writeKnownAttributes): Write deprecated attribute.
+	(isDeprected): New function.
+	(setDeprecated): Likewise.
+
+	* src/net/sf/jode/bytecode/BasicBlockReader.java (readCode): Fix
+	the exception handlers that javac 1.4 produces: I simply shorten
+	the start/end interval, so that the catcher is not in the end
+	interval.
+
+	* src/net/sf/jode/flow/CreateAssignExpression.java
+	(createAssignOp): Bug fix: Check whether store is already a
+	op-assign and break out.
+	* src/net/sf/jode/expr/StoreInstruction.java (isOpAssign): New
+	function to check whether this is an op-assign.
+
+	* src/net/sf/jode/flow/CatchBlock.java (combineLocal): Added more
+	checks if LocalStoreOperator is of the right form.
+
+	* net/sf/jode/flow/TransformConstructors.java (Constructor): Ignore
+	OuterValues for static constructor.
+
+	* src/net/sf/jode/expr/CompareToIntOperator.java (dumpExpression):
+	Added a missing breakOp.
+
+2004-01-22  Jochen Hoenicke  <hoenicke@informatik.uni-oldenburg.de>
+
+	* net/sf/jode/jvm/CodeVerifier.java (modelEffect): Allow assigning
+	fields in an uninitialized class as some synthetic code does this.
+
+2003-06-11  Mark Morschhäuser  <mark.morschhaeuser@firemail.de>
+	* net/sf/jode/decompiler/Main.java:  New MenuItem to save a decompiled file.
+	
+	* net/sf/jode/decompiler/Main.java:  Main-window will be centered on startup
+	
+	* build.xml:
+	(release): Added MANIFEST.MF to target and enabled compressed jar-file
+	
+	* MANIFEST.MF: Added this file to be able to create an executable jar-file
+	
+2002-06-11  Jochen Hoenicke  <jochen@gnu.org>
+
+	* net/sf/jode/decompiler/Main.java:  New option keep-alive.  With
+	this option jode won't stop after an error but will continue with
+	the next class.
+	Patch suggested by Francis Devereux, francis at hc.eclipse.co.uk
+
+2002-02-25  Jochen Hoenicke  <jochen@gnu.org>
+
+	* jode/bytecode/ClassInfo.java.in (read):  Don't check for a
+	maximum version anymore.  Sun changes it with every release without
+	changing the bytecode format.
+
+2002-02-15  Jochen Hoenicke  <jochen@gnu.org>
+
+	* net/sf/jode/bytecode/BasicBlockReader.java: handle empty loops.
+	(IS_NULL): new constant to tag empty blocks.
+	(markReachableBlocks): check for empty loops. 
+	(convertBlock): Handle empty blocks.
+	(convert): Handle IS_NULL.
+
+	* net/sf/jode/decompiler/MethodAnalyzer.java:
+	(analyzeCode): handle empty blocks.
+
+2001-08-14  Jochen Hoenicke  <jochen@gnu.org>
+
+	* build.xml: test is default.
+	(release-javadoc): New target.
+	(release-src): Get from dir test only source files.
+	(doc-javadoc): More parameters for nicer docu.
+
+2001-08-12  Jochen Hoenicke  <jochen@gnu.org>
+
+	* net/sf/jode/bytecode/TypeSignature.java: 
+	(getArgumentSize): Renamed to ...
+	(getParameterSize): ... this.  Changed all callers.
+	(skipType): Made private.
+
+	* net/sf/jode/jvm/CodeVerifier.java: 
+	(initInfo): Use TypeSignature.getParameterTypes instead of skipType.
+
+	* net/sf/jode/jvm/SyntheticAnalyzer.java:
+	(checkGetClass): Be more lenient with the types, they are already
+	checked by the CodeVerifier.  This is to support jdk-1.4.
+
+	* net/sf/jode/expr/InvokeOperator.java
+	(dumpExpression): Fixed the check for null outerExpr.
+
+	* net/sf/jode/flow/FlowBlock.java: 
+	(checkConsistent): Allow lastModified in a finally block.
+	* net/sf/jode/flow/TransformExceptionHandlers.java: Reworked exception
+	handlers again.  This time checked with javac 1.3, javac 1.1 and
+	jikes.
+	(checkTryCatchOrder): New method that was previously part of
+	analyze.
+	(analyze): Use checkTryCatchOrder.  Don't merge try and catch flow
+	blocks anymore, leave it to the analyzeXXX methods.
+	(mergeTryCatch): New method.
+	(analyzeCatchBlock): Get catchFlow as parameter. Call
+	mergeTryCatch.
+	(transformSubroutine): Handle POP-only subroutines.
+	(removeJSR): Don't do special case for catchBlock any more.  This
+	is because catchFlow isn't yet merged when this method is called.
+	(checkAndRemoveJSR): Likewise.
+	(checkAndRemoveMonitorExit): Likewise.  Merge subroutine only if
+	we are the only predecessor.
+	(analyzeSynchronized): Get catchFlow as parameter. Call
+	mergeTryCatch.
+	(mergeFinallyBlocks): New method, calls mergeTryCatch and does the
+	common part of mergeFinally and mergeSpecialFinally.
+	(analyzeFinally): Simplified, after checking and removing JSR, it
+	does immediately analyze and transform subroutine to get the
+	finallyBlock.  Then it throws away the catchFlow and calls
+	mergeFinallyBlocks.
+	(analyzeSpecialFinally): Simplified, after checking it only handles
+	the jumps in the try part and then call mergeFinallyBlocks.
+
+2001-08-08  Jochen Hoenicke  <jochen@gnu.org>
+	More Documentation updates.
+	* build.xml: Release rules.
+	* scripts/jcpp.pl: Don't make backups of original.
+	* net/sf/jode/bytecode/BasicBlocks.java (setBlocks): Check that
+	successors are inside method.
+	* net/sf/jode/bytecode/Block.java (getStackHeight): New Method.
+	* net/sf/jode/bytecode/ClassPath.java (Location): public class to
+	model a component of the class path.  Previously it was Path.
+	(ClassPath): New constructors added that take Location objects.
+	* net/sf/jode/bytecode/ConstantPool.java (getClassName): Cache
+	constants.
+	* net/sf/jode/bytecode/GrowableConstantPool.java: Made public.
+	(grow): Check that not too many constants are added.
+	(reserveLongConstants): Removed (not used).
+	(copyConstant): Removed (not used).
+	* net/sf/jode/jvm/NewObject.java: Made package protected.
+	* net/sf/jode/obfuscator/modules/RemovePopAnalyzer.java: 
+	Big updates (almost rewrote from scratch).  Still doesn't compile.
+	
+2001-08-05  Jochen Hoenicke  <jochen@gnu.org>
+
+	Documentation updates (INSTALL, javadoc).
+	Added JUnit Test cases.
+	* build.xml: Big update.
+	* net/sf/jode/bytecode/BasicBlock.java:
+	(updateMaxStackLocals): new method to calculate maxStack and
+	maxLocals.
+	(setBlocks): fixed calculation of handlers, call updateMaxLocals.
+	* net/sf/jode/bytecode/BasicBlockReader.java:
+	(maxLocals, maxStack): new fields.
+	(readCode): read maxStack/Locals into private fields.
+	(convert): check that maxStack/Locals match what we calculate.
+	* net/sf/jode/bytecode/BinaryInfo.java:
+	(getKnownAttributeCount): renamed to...
+	(getAttributeCount): ... this, and also count internal attributes.
+	Made it protected.
+	(readAttribute): made protected.
+	(drop): made protected.
+	(prepareAttributes): made protected.
+	(writeKnownAttributes): removed.
+	(writeAttributes): made protected, use getAttributeCount.  
+	Changed policy: it doesn't call writeKnownAttribute, but instead
+	it expects sub classes to override this method.
+	(getAttributeSize): made protected, subclasses should override it.
+	Changed all subclasses to new policy.
+	* net/sf/jode/bytecode/Block.java:
+	(lineNr): Removed, it wasn't used.
+	(pop,push): Removed, replaced by ...
+	(maxpop,maxpush,delta): ... these, with slightly changed semantics.
+	(stackHeight): New variable.
+	(Block): Default Constructor doesn't initialize fields now.
+	(getCatchers): Renamed to ...
+	(getHandlers): ... this, changed all callers.
+	(initCode): Calculate maxpop, maxpush, delta correctly.
+	(getStackPopPush): Changed accordingly to new fields.
+	(setCode): Removed debugging output for illegal contents.
+	* net/sf/jode/bytecode/Classes.java:  Reworked handling of inner
+	classes.
+	(innerClasses): Field mustn't be null anymore when loaded.
+	(setName): Update class in classpath.
+	* net/sf/jode/bytecode/ClassPath.java:
+	(renameClassInfo): new function, should only used by ClassInfo.
+	* net/sf/jode/bytecode/ConstantPool.java: made public.
+	(getUTF8,getRef,getClassType,getClassName): Don't allow the 0 index.
+	(iterateClassNames): New method.
+	* net/sf/jode/decompiler/Main.java:
+	(decompileClass): Catch ClassFormatExceptions and decompile
+	remaining classes.
+	* net/sf/jode/obfuscator/ClassIdentifier.java:
+	Updated handling of inner/extra classes to new ClassInfo behaviour.
+	(initSuperClasses): Load DECLARATION of super classes.
+	* net/sf/jode/obfuscator/PackageIdentifier.java:
+	Replace deprecated methods of ClassInfo with corresponding classpath
+	calls.
+	(loadMatchingClasses): Initialize packages loaded on demand if we
+	are initialize.
+	* net/sf/jode/obfuscator/modules/ConstantAnalyzer.java:
+	Now extends SimpleAnalyzer.
+	(canonizeIfaceRef): Removed; it is now inherited.
+	(canonizeRef): likewise.
+	Big updates to handle jsr correctly.
+	(handleOpcode):  Moved method to BlockInfo.
+	* net/sf/jode/obfuscator/modules/SimpleAnalyzer.java:
+	(canonizeIfaceRef): New method, copied from ConstantAnalyzer.
+	(canonizeRef): call canonizeIfaceRef for interfaces.
+	* net/sf/jode/util/UnifyHash.java
+	(iterateHashCode): iterator now supports remove().
+	(remove): New method.
+
+2001-07-30  Jochen Hoenicke  <jochen@gnu.org>
+
+	Changed compilation procedure to ant.
+
+2001-07-30  Jochen Hoenicke  <jochen@gnu.org>
+
+	* jode/bytecode/BasicBlockReader.java: Fixed import of non
+	collection java.util classes.
+	* jode/bytecode/BasicBlockWriter.java: likewise.
+
+2001-07-28  Jochen Hoenicke  <jochen@gnu.org>
+
+	* jode/AssertError.java: removed, all uses are now replaced
+	by java.lang.InternalError.
+	* jode/Makefile.am: removed AssertError.java
+	* jode/bytecode/ClassInfo.java: reworked handling of inner
+	classes.
+	(extraClasses): removed, they are calculated automatically.
+	(hasInnerClassesAttr): new variable.
+	(readInnerClassesAttribute): Mark all classes in the constant
+	pool as having OUTERCLASS info filled.  Don't handle extraClasses
+	specially.
+	(prepareWriting): Change for automatically generating outer
+	class info.
+	(getKnownAttributes): dito.
+	(writeKnownAttributes): dito.
+	(getExtraClasses): removed.
+	(setExtraClasses): removed.
+
+	* jode/bytecode/ClassAnalyzer.java (conflicts): load or guess
+	declarations of info before getting inner classes.
+	* jode/decompiler/TabbedPrintWriter.java (BreakPoint.endOp):
+	Set options correctly.
+	* jode/expr/InvokeOperator.java (getMethodInfo): load or guess
+	declarations before accessing methods.
+	* jode/flow/FlowBlock.java (resolveSomeJumps): When creating a
+	if-then-else move the jump from the then branch to the if, before
+	restarting analysis.
+	(doT1): handle the case when lastModified.jump is null.  Throw
+	statements have no jump now.
+	* jode/jvm/SyntheticAnalyzer (checkAccess): Fix the detection for
+	PUTDUPSTATIC/FIELD.
+	* jode/type/ClassType.java (getCastHelper): More checks when
+	cast is not needed: interfaces and null pointer.
+
+2001-07-15  Jochen Hoenicke  <jochen@gnu.org>
+	* jode/decompiler/Decompiler.java (decompile): removed 
+	setClassPath call.  ClassInfo.forName() is no longer used.
+	* jode/decompiler/Main.java (decompile): likewise.
+	
+2001-07-15  Jochen Hoenicke  <jochen@gnu.org>
+	Applied patches from 2001-05-26 of Jode 1.1 tree:
+	* configure.in: Set version to 1.1.
+
+	* jode/swingui/Main.java (main): Also use bootclasspath if no
+	classpath given.
+
+	* jode/decompiler/MethodAnalyzer.java (skipWriting): Don't skip
+	empty constructor that have a throws clause.
+
+	* configure.in: Determine whether jdk1.1 resp. jdk1.2.  Call jcpp
+	in config.status.
+
+	* jode/expr/Expression.java (makeInitializer): Now takes the
+	type of the initialization.  Changed all callers.
+	* jode/expr/ConstantArrayOperator.java (makeInitializer): Check
+	that type is our array type, otherwise we can't omit new Array[].
+
+	* jode/decompiler/LocalInfo.java (markFinal): Don't check that
+	only one write is present.  If two writes are in an then and an
+	else branch of an if, the local can still be final.
+
+	* jode/type/ArrayType.java (getSubType): Handle array of integer
+	types correctly: byte[] is something completely different than
+	int[].
+	(getSuperType): Likewise.
+
+	* jode/expr/FieldOperator.java (getFieldInfo):  New function.
+	(needsCast): A cast is also needed if the field is private or
+	package scope and the current type can't access the field.
+
+	* jode/expr/InvokeOperator.java (getMethodInfo):  New function.
+	(needsCast): A cast is also needed if the method is private or
+	package scope and the current type can't access the method.
+
+	* jode/expr/ArrayStoreOperator.java (dumpExpression): Check if a
+	cast of the array expression is needed.
+
+	* jode/expr/TransformConstructors.java
+	(transformFieldInitializers): Don't allow moving method invocations
+	that throw a checked exception.
+
+	* jode/bytecode/MethodInfo.java (readAttribute): Read Exceptions
+	attribute even when not all attributes should be read.  They are
+	needed by TransformConstructors, see above.
+
+	* jode/decompiler/TabbedPrintWriter.java (saveOps): Don't allow
+	line breaks in not completed expressions since implicit parentheses
+	would destroy the syntax.  No need to put line break option on stack.
+	(restoreOps): Adapted Stack format.		
+
+	* jode/decompiler/ClassAnalyzer.java (dumpDeclaration): Moved
+	Code from dumpSource here.  Don't put a line break after closing
+	brace.
+	(dumpSource): call dumpDeclaration and add a line break.
+	(dumpBlock): Moved dropInfo(ATTRIBS) here.
+
+	* jode/decompiler/ClassAnalyzer.java (STRICTFP): New Constant.
+	(isStrictFP): New function.
+	(initialize): Set strictfp modifier if a constructor has it set.
+	(dumpSource): Handle strictfp modifier.
+	
+	* jode/decompiler/MethodAnalyzer.java (STRICTFP): New Constant.
+	(isStrictFP): New function.
+	(dumpSource): Handle strictfp modifier.
+	
+	* jode/jvm/SyntheticAnalyzer.java (checkAccess): Check for a
+	special putfield access, where the set value is returned.  Allow
+	the modifier of field/method to be protected and the class to be
+	a superclass.
+	(checkStaticAccess): Likewise.
+	(ACCESSDUPPUTFIELD): New Constant.
+	(ACCESSDUPPUTSTATIC): New Constant.
+
+	* jode/expr/InvokeOperator.java (simplifyAccess): Handle new
+	synthetics.
+
+	* jode/flow/SpecialBlock.java (removePop): Remove pop also for
+	non void store instructions.
+
+	* jode/decompiler/MethodAnalyzer.java (skipWriting): Also skip
+	the new synthetics.
+
+	* jode/decompiler/Main.java (main): Call System.exit() after
+	everything was compiled.
+
+	* jode/flow/TransformExceptionHandlers.java (removeJSR):
+	Renamed back from removeBadJSR (see patch from 2001-02-04).  The
+	checkAndRemove* functions mustn't change the successors while they
+	iterate over them.  Instead of removing good jsr they mark them as
+	good and removeJSR will finally remove them.
+	(checkAndRemoveJSR): See above.
+	(checkAndRemoveMonitorExit): See above.
+
+	* jode/flow/JsrBlock.java (good): New variable, see above.
+	(setGood): New method.
+	(isGood): New method.
+
+2001-07-15  Jochen Hoenicke  <jochen@gnu.org>
+	Applied patch from 2001-05-08 of Jode 1.1 tree:
+	* jode/jvm/CodeVerifier.java (doVerify): Don't check for
+	uninitialized objects in local or stack slots on backwards jump or
+	exception blocks.  Sun's jdk also doesn't check it, and I never
+	understood why it is necessary.  But see JVM Spec 4.9.4.
+
+2001-07-15  Jochen Hoenicke  <jochen@gnu.org>
+	Applied patch from 2001-05-02 of Jode 1.1 tree:
+	* jode/obfuscator/modules/ConstantAnalyzer.java (handleOpcode):
+	Added divide by zero checks for opc_irem and opc_lrem.
+
+2001-07-15  Jochen Hoenicke  <jochen@gnu.org>
+	Applied patches from 2001-02-27 of Jode 1.1 tree:
+
+	* acinclude.m4 (JODE_CHECK_CLASS): Changed "test -e" to "-f" since
+	-e is not supported on all architectures (Solaris) and -f is more
+	correct anyway. 
+	Reported by Erik Modén.
+
+	* jode/swingui/Main.java (AreaWriter): Convert all kinds of
+	line breaks (CR+LF, CR, LF) to a LF character, which a JTextArea
+	understands.
+
+2001-07-15  Jochen Hoenicke  <jochen@gnu.org>
+	Applied patch from 2001-02-04 of Jode 1.1 tree:
+
+	* jode/expr/IfThenElseOperator.java (simplify): Allow in the class$
+	simplification the then and else part to be swapped.
+	* jode/type/ClassType.java (keywords): Added the package
+	and import keywords.
+
+	* jode/flow/TransformExceptionHandlers.java:
+	(getPredecessor): New function.
+	(getMonitorExitSlot): New function.
+	(skipFinExitChain): New function.
+	(removeJSR): Replaced by ...
+	(removeBadJSR): ... this.
+	(checkAndRemoveJSR): Use the new functions. Much simpler and
+	handles nested synchronized blocks.  It now traces the whole JSR
+	and monitorexit chain before a jump to the first entry via
+	skipFinExitChain, then checks and remove the first JSR
+	resp. monitorexit.  JSR jumps are simply ignored now.
+	(checkAndRemoveMonitorExit): likewise.
+	* jode/flow/StructuredBlock.java (prependBlock): New function.
+	* jode/flow/CatchBlock.java (makeDeclaration): Generate name
+	of dummyLocal, since nobody else will generate it.
+	
+	* jode/bytecode/BasicBlockReader.java (readCode): Remove bogus
+	exceptionHandlers, whose catchers just throw the exception again.
+	This kind of entries are inserted by an obfuscator and would break
+	JODE.
+	* jode/util/UnifyHash.java (iterateHashCode): Call cleanUp,
+	to clean unneeded references.
+	* jode/flow/TransformConstructors.java (transformOneField):
+	Changed to private. Take field number as parameter.  Check that
+	expression doesn't contain a FieldOperator for a later field of
+	the same class or a PutFieldOperator.  Changed all callers.
+
+2001-07-15  Jochen Hoenicke  <jochen@gnu.org>
+
+	Applied patch from 2001-02-01 of Jode 1.1 tree:
+	* jode/jvm/CodeVerifier.java (Type.mergeType): If array elem
+	types can't be merged, return tObject as common super type.
+	* jode/type/ArrayType.java (getGeneralizedType): If array elem
+	type can't be intersected, return tObject as common super type.
+
+2001-07-15  Jochen Hoenicke  <jochen@gnu.org>
+	Applied patch from Jode 1.1 tree:
+
+	* jode/expr/Expression.java (updateParentTypes): Call setType,
+	instead of merging the types.  Other childs want to know about the
+	type change as well.
+	* jode/decompiler/LocalInfo.java (combineWith): Reorganized a bit,
+	but no changes.
+	* jode/expr/InvokeOperator.java (dumpExpression): Always print
+	the ThisOperator if a field is from a parent class of an outer
+	class is used.  And always qualify the this operator if not
+	innermost.
+
+2001-07-14  Jochen Hoenicke  <jochen@gnu.org>
+	Applied patches from the Jode 1.1 tree:	
+
+	* jode/decompiler/TabbedPrintWriter.java: Better gnu style handling:
+	(openBraceClass) (closeBraceClass)
+	(openBraceNoIndent) (closeBraceNoIndent): new functions.
+	(closeBraceNoSpace): Removed.
+	* jode/decompiler/TabbedPrintWriter.java (GNU_SPACING): new constant.
+	(printOptionalSpace): Print space for GNU_SPACING.
+	* jode/decompiler/Options.java (setOptions): changed gnu style
+	to include GNU_SPACING.
+	* jode/decompiler/ClassAnalyzer.java (dumpSource): Use
+	open/closeBraceClass.
+	* jode/decompiler/MethodAnalyzer.java (dumpSource): Use
+	open/closeBraceNoIndent.  Call printOptionalSpace.
+	* jode/decompiler/InvokeOperator.java (dumpExpression): 
+	Call printOptionalSpace, use open/closeBraceClass for inner
+	classes.
+	* jode/decompiler/UnaryOperator.java (dumpExpression): Call
+	printOptionalSpace.
+
+	Added pascal style from Rolf Howarth <rolf@squarebox.co.uk>
+	* jode/decompiler/Decompiler.java (setOption): detect pascal option.
+	* jode/decompiler/TabbedPrintWriter.java (BRACE_FLUSH_LEFT): 
+	new constant.
+	(openBrace, openBraceContinue, closeBrace, closeBraceNoSpace,
+	closeBraceContinue): handle flush left.
+	
+	* jode/type/NullType.java (intersection): Removed, since the
+	version in ReferenceType is more correct.  Before
+	tNull.isOfType(tRange(X,tNull)) returned false, which lead to
+	incorrect behaviour in InvokeOperator.needsCast.
+	* jode/decompiler/FieldAnalyzer.java (dumpSource): Removed the
+	"= null" hack for final fields; it was not correct, since the
+	field could be initialized in a constructor.
+	* jode/decompiler/TabbedPrintWriter.java (BreakPoint.endOp):
+	Simplified the code, copy options always from child.
+	* jode/expr/InvokeOperator.java (isGetClass): Allow the method to
+	be declared inside an outer class:  We simply check if we can get
+	the method analyzer.
+	(simplify): handle unifyParam.
+	* jode/expr/PopOperator.java (getBreakPenalty): return penalty of
+	inner expression. (dumpExpression): Call dumpExpression of
+	subexpression immediately without priority.

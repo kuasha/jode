@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Jakarta-Ant build file for jode, Copyright (C) 1999-2004 Jochen Hoenicke.
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2, or (at your option)
+ any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; see the file COPYING.  If not, write to
+ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+ $Id: build.xml 1384 2004-08-06 17:54:28Z hoenicke $
+-->
+
+<!DOCTYPE project PUBLIC "-//ANT//DTD project//EN" "project.dtd">
+<project name="jode" default="test" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="version" value="1.90-CVS"/>
+
+  <property name="build" value="${basedir}/build"/>
+  <property name="props" value="${basedir}/props"/>
+  <property name="doc"   value="${basedir}/doc"/>
+  <property name="lib"   value="${basedir}/lib"/> 
+  <property name="src"   value="${basedir}/src"/>
+  <property name="release" value="${basedir}/release"/>
+  <property name="distdir" value="${release}/jode-${version}"/>
+  <property name="scripts" value="${basedir}/scripts"/>
+
+  <property name="api.doc" value="${doc}/api"/>
+
+  <property name="test" value="${basedir}/test"/>
+  <property name="test.src" value="${test}/src"/>
+  <property name="test.build" value="${test}/build"/>
+  <property name="test.log" value="${test}/log"/>
+  
+  <property name="jcpp" value="${scripts}/jcpp.pl"/>
+
+  <property name="versionfile" value="${src}/jode/GlobalOptions.java"/>
+
+  <property file="config.props"/>
+
+  <path id="project.classpath">
+    <pathelement path="${classpath}"/>
+    <fileset dir="lib" includes="*.jar"/>
+  </path>
+
+  <!-- ********* General targets ******* -->
+
+  <!-- compiles jode and creates its javadoc-files -->
+  <target name="all" depends="build,doc"/>
+
+  <!-- clean all -->
+  <target name="clean" depends="clean-jcpp,clean-build,clean-doc,clean-test"/>
+  <target name="cvsclean" depends="clean,clean-html,clean-release"/>
+
+  <!-- ********* jcpp targets ******* -->
+
+  <target name="check-jcpp" unless="perl.present">
+    <fail message="need perl to configure for JDK 1.1"/>
+  </target>
+
+  <target name="run-jcpp" depends="check-packages,check-jcpp">
+    <apply dir="." executable="perl" parallel="true">
+      <arg file="${jcpp}"/>
+      <arg value="-DJDK11"/>
+      <arg value="-DCOLLECTIONS=${collections.package}"/>
+      <arg value="-DCOLLECTIONEXTRA=${collections.package}"/>
+      <arg value="-DJAVAX_SWING=${swing.package}"/>
+      <fileset dir="${src}" includes="**/*.java"/>
+    </apply>
+  </target>
+
+  <target name="clean-jcpp" if="perl.present">
+    <apply dir="." executable="perl" parallel="true">
+      <arg file="${jcpp}"/>
+      <arg value="-DJDK12"/>
+      <arg value="-DCOLLECTIONS=java.util"/>
+      <arg value="-DCOLLECTIONEXTRA=java.lang"/>
+      <arg value="-DJAVAX_SWING=javax.swing"/>
+      <fileset dir="${src}" includes="**/*.java"/>
+    </apply>
+  </target>
+
+  <!-- ********* Check Environment ******* -->
+
+  <target name="check-jdk" unless="jdk1.1.forced">
+    <available property="jdk1.2+" classname="java.lang.ThreadLocal" />
+    <available property="jdk1.3+" classname="java.lang.StrictMath" />
+  </target>
+
+  <target name="fail-getopt" unless="getopt.present">
+    <fail message="Package gnu.getopt not found!"/>
+  </target>
+  <target name="check-getopt">
+    <available property="getopt.present"
+	       classname="gnu.getopt.Getopt"
+	       classpathref="project.classpath" />
+    <antcall target="fail-getopt"/>
+  </target>
+
+  <target name="check-packages">
+    <available property="collections.package" 
+	       value="gnu.java.util.collections"
+               classname="gnu.java.util.collections.Set"
+               classpathref="project.classpath" />
+    <available property="collections.package" 
+	       value="org.gnu.java.util.collections"
+               classname="org.gnu.java.util.collections.Set"
+               classpathref="project.classpath" />
+    <available property="collections.package" 
+	       value="com.sun.java.util.collections"
+               classname="com.sun.java.util.collections.Set"
+               classpathref="project.classpath" />
+    <available property="swing.package" value="com.sun.java.swing"
+               classname="com.sun.java.swing.JFrame"
+               classpathref="project.classpath" />
+    <available property="swing.package" value="javax.swing"
+               classname="javax.swing.JFrame"
+               classpathref="project.classpath" />
+  </target>
+
+  <!-- ********* Build targets ******* -->
+
+  <target name="preconfig" depends="check-jdk,check-getopt,preconfig.11"/>
+  <target name="preconfig.11" unless="jdk1.2+">
+    <antcall target="run-jcpp"/>
+  </target>
+  <target name="preconfig.12" if="jdk1.2+">
+    <antcall target="clean-jcpp"/>
+  </target>
+
+  <target name="build-1.1">
+    <antcall target="build">
+      <param name="jdk1.1.forced" value="on"/>
+    </antcall>
+  </target>
+
+  <target name="build" depends="check-jdk,preconfig">
+    <mkdir dir="${build}"/>
+    <javac srcdir="${src}"
+	   destdir="${build}"
+	   debug="true"
+	   classpathref="project.classpath"
+	   deprecation="on">
+    <exclude name="net/sf/jode/obfuscator/modules/RemovePopAnalyzer.java"/>
+    <exclude name="net/sf/jode/obfuscator/modules/LocalOptimizer.java"/>
+    <exclude name="net/sf/jode/obfuscator/modules/LocalizeFieldTransformer.java"/>
+      <!--
+    <exclude name="net/sf/jode/bytecode/*Subroutine*" />
+      -->
+    </javac>
+  </target>
+
+  <!-- clean the class files -->
+  <target name="clean-build">
+    <delete dir="${build}"/>
+  </target>
+  
+  <!-- ********* Create Release files ******* -->
+
+  <target name="release" depends="release-bin,release-bin11,release-src,release-javadoc"/>
+
+  <target name="release-bindist" depends="build">
+    <jar jarfile="${distdir}/jode.jar" compress="true" manifest="${basedir}/MANIFEST.MF">
+	<fileset dir="${build}" includes="**/*.class"/>
+	<fileset dir="${props}" includes="**/*.properties"/>
+    </jar>
+    <copy todir="${distdir}">
+      <fileset dir="${lib}">
+        <include name="*getopt*.jar" />
+        <include name="*collection*.jar" unless="jdk1.2+" />
+      </fileset>
+      <fileset dir="${basedir}"
+	       includes="AUTHORS,COPYING,NEWS,README,THANKS,TODO">
+        <include name="doc/*.html" />
+        <include name="doc/*.gif" />
+        <include name="doc/*.jos" />
+        <include name="doc/*.perl" />
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="release-bin" depends="doc-html">
+    <antcall target="clean"/>
+    <mkdir dir="${release}"/>
+    <mkdir dir="${distdir}"/>
+    <antcall target="release-bindist"/>
+    <jar jarfile="${release}/jode-${version}.jar"
+	 basedir="${release}" includes="jode-${version}/**"/>
+    <delete dir="${distdir}"/>
+    <antcall target="clean"/>
+  </target>
+
+  <target name="release-bin11" depends="doc-html">
+    <antcall target="clean"/>
+    <mkdir dir="${release}"/>
+    <mkdir dir="${distdir}"/>
+    <antcall target="release-bindist">
+      <param name="jdk1.1.forced" value="on"/>
+    </antcall>
+    <jar jarfile="${release}/jode-${version}-JDK1.1.jar"
+	 basedir="${release}" includes="jode-${version}/**"/>
+    <delete dir="${distdir}"/>
+    <antcall target="clean"/>
+  </target>
+
+  <target name="release-src" depends="doc-html">
+    <antcall target="clean"/>
+    <mkdir dir="${release}"/>
+    <mkdir dir="${distdir}"/>
+    <copy todir="${distdir}">
+      <fileset dir="${basedir}"
+	       includes="AUTHORS,COPYING,INSTALL,NEWS,README,THANKS,TODO,ChangeLog">
+        <include name="build.xml,config.props,project*.dtd"/>
+        <include name="doc/**"/>
+        <include name="scripts/**"/>
+        <include name="src/**"/>
+        <include name="test/*.java"/>
+        <include name="test/*.j"/>
+        <include name="test/src/**"/>
+        <include name="props/**"/>
+        <include name="lib/**"/>
+      </fileset>
+    </copy>
+    <jar jarfile="${release}/jode-${version}-src.jar"
+	 basedir="${release}" includes="jode-${version}/**"/>
+    <delete dir="${distdir}"/>
+  </target>
+
+  <target name="release-javadoc">
+    <antcall target="doc-javadoc"/>
+    <mkdir dir="${release}"/>
+    <jar jarfile="${release}/jode-${version}-API.jar"
+	 basedir="${doc}" includes="api/**"/>
+    <antcall target="clean-doc"/>
+  </target>
+
+  <target name="clean-release">
+    <delete dir="${release}"/>
+  </target>
+
+  <!-- ********* Javadoc targets ********** -->
+
+  <target name="doc" depends="doc-javadoc,doc-html"/>
+
+  <target name="doc-html" if="htp.present">
+    <apply executable="htp" dir="${doc}" dest="${doc}" parallel="false" relative="yes">
+      <arg value="-NODEPEND" />
+      <srcfile />
+      <targetfile />
+      <fileset dir="${doc}" includes="*.htp"/>
+      <mapper type="glob" from="*.htp" to="*.html"/>
+    </apply>
+  </target>
+  <target name="doc-javadoc">
+    <tstamp>
+      <format property="date" pattern="MMM d, yyyy"/>
+    </tstamp>
+    <mkdir dir="${api.doc}"/>
+    <javadoc packagenames="net.sf.jode.*"
+	     windowtitle="Jode ${version} API Specification"
+	     header='&lt;b&gt;&lt;a href="http://jode.sourceforge.net/"&gt;Jode&lt;/a&gt; ${version}&lt;/b&gt;&lt;br&gt;&lt;font size="-2"&gt;Build ${date}&lt;/font&gt;'
+	     overview="${src}/net/sf/jode/overview.html"
+	     bottom='Copyright &amp;copy; 1998-2004 by Jochen Hoenicke.'
+	     sourcepath="${src}"
+	     destdir="${api.doc}"
+	     use="yes">
+      <link offline="${javadoc.offline}" 
+	    href="${javadoc.href}" 
+	    packagelistLoc="${javadoc.packagelistLoc}"/>
+    </javadoc>
+  </target>
+
+  <target name="clean-doc">
+    <delete dir="${api.doc}"/>
+  </target>
+
+  <target name="clean-html">
+    <delete>
+      <fileset dir="${doc}" includes="*.html"/>
+    </delete>
+  </target>
+
+  <!-- ********* test targets ************* -->
+
+  <target name="build-test" depends="build">
+    <mkdir dir="${test.build}"/>
+    <javac srcdir="${test.src}"
+	   destdir="${test.build}"
+	   debug="true"
+	   classpathref="project.classpath"
+	   classpath="${build}"
+	   deprecation="on">
+    </javac>
+  </target>
+
+  <target name="test" depends="build-test">
+    <mkdir dir="${test.log}"/>
+    <junit printsummary="yes" fork="yes" haltonfailure="yes">
+      <classpath>
+        <pathelement path="${test.build}"/>
+        <pathelement path="${build}"/>
+	<path refid="project.classpath"/>
+      </classpath>
+      <formatter type="plain" />
+      <batchtest fork="no" todir="${test.log}">
+        <fileset dir="${test.src}">
+          <include name="**/*.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="test-cvs" depends="build-test">
+    <mkdir dir="${test.log}"/>
+    <junit printsummary="yes" fork="yes" haltonfailure="yes">
+      <classpath>
+        <pathelement path="${test.build}"/>
+        <pathelement path="${build}"/>
+        <fileset dir="lib" includes="*.jar"/>
+        <fileset dir="/usr/local/ant/lib" includes="*.jar"/>
+      </classpath>
+      <formatter type="plain" />
+      <batchtest fork="no" todir="${test.log}">
+        <fileset dir="${test.src}">
+          <include name="**/*.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="clean-test">
+    <delete dir="${test.build}"/>
+    <delete dir="${test.log}"/>
+  </target>
+
+  <!-- ********* version targets ************* -->
+
+  <target name="setversion" if="version">
+    <echo message="updating version in ${versionfile} ..."/>
+    <exec executable="perl">
+      <arg value="-i"/>
+      <arg value="-pe"/>
+      <arg value='s/(String\s*version\s*=\s*")[^"]*/$1${version}/' />
+      <arg value="${versionfile}"/>
+    </exec>
+  </target>
+
+  <target name="commit" depends="setversion,test-cvs" if="version">
+    <antcall target="cvsclean"/>
+    <echo message="---------------------------------------------------"/>
+    <echo message='  Commiting new Jode version: ${version} !!!'/>
+    <echo message="==================================================="/>
+    <!-- 
+    search the old version information and replace it with the new version
+    we will search the $(mainclass) for 'String VERSION = "..."' and
+    replace the contents of the String with the new version. 
+    -->
+
+    <!-- commit the new $(VERSIONFILE) to the CVS
+    <echo message="commiting updated file to CVS..."/>
+    <cvs command='ci -m"new version ${version}" ${versionfile}'/>
+    -->
+
+    <!-- commit the new $(VERSIONFILE) to the CVS
+    <echo message="tagging files in CVS..."/>
+    <property
+    <cvs command="tag ${cvstag}"/>
+    -->
+
+    <echo message="...done!"/>
+    <echo message="---------------------------------------------------"/>
+  </target>
+</project>

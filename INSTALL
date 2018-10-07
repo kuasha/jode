@@ -1,0 +1,23 @@
+Before installing, make sure you have at least version 1.1 of the java
+developement kit installed.  If you want to run this program you only
+need the java runtime environment.  Version 1.1 is quite old, I
+recommend using Java 2 (jdk1.2 or above).  You need perl if you want
+to compile a 1.1 version.
+
+This package was designed to use the ANT from the jakarta.apache.org
+tools.  I assume you have installed it correctly. 
+
+Take some time to edit config.props.  There are a few options you need
+to take care of.  (Unfortunately ant can't test for executables).
+
+Now you are ready to invoke ant.  There are many possible targets, here
+are the most useful ones:
+
+all       builds class files and documentation.
+build     builds class files only (autodetects java version).
+build-1.1 builds JDK1.1 class files.
+doc       builds documentation.
+dist      creates all release files.
+test      does some self tests.  You need to have junit installed for this.
+clean     cleans everything that doesn't belong to the source distribution.
+cvsclean  cleans everything that doesn't belong into the cvs repository.

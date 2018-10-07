@@ -1,0 +1,52 @@
+<opt quiet>
+<file template="jode.htt">
+<set version="1.1">
+<set sfgroup="3790">
+<def name="sflink" option="href">
+  <a href="http://sourceforge.net/${href}?group_id=${sfgroup}">
+</def>
+<def name="entry" option="name type href">
+  <if type="sflink">
+    <sflink href="$href"><use name></a>
+  <else>
+    <if _htpfile_out="${href}.html">
+       <use name>
+    <elseif $href="index">
+      <a href="."><use name></a>
+    <else>
+      <a href="${href}.html"><use name></a>
+    </if>
+  </if>
+</def>
+
+<block name=menu>
+  <entry name="<B>Home</B>" href="index">
+  <entry type=sflink name="Project page" href="project/">
+  <entry name="Applet" href="applet">
+  <entry name="Download" href="download">
+  <entry name="FAQ" href="faq">
+  <entry name="Feedback" href="feedback">
+  <entry name="Documentation" href="usage">
+  <entry name="License" href="license">
+  <entry name="History" href="history">
+  <entry name="Links" href="links">
+  <entry name="Blue Sky" href="bluesky">
+</block>
+
+<blockdef name=section option="title">
+  <if not sect_ctr><set sect_ctr="0" global></if>
+  <inc sect_ctr global>
+  <set title${sect_ctr}="$title" global>
+  <block name=section${sect_ctr} global expand>
+    <use block noexpand>
+  </block>
+</blockdef>
+
+<block name=everything>
+  <set i=1>
+  <while section$i>
+    <h1><use title$i></h1>
+    <use section$i>
+    <inc i>
+  </while>
+</block>

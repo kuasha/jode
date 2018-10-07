@@ -1,0 +1,28 @@
+# This is a sample script file to obfuscate the JODE project.
+
+# First we select what we want to strip.  There are several possibilities:
+#   unreach - strip unreachable methods and classes.
+#   source  - strip source file attribute.
+#   lnt     - strip line number table.
+#   lvt     - strip local variable table.
+#   inner   - strip inner class info
+strip = "unreach"
+
+load = new WildCard { value = "jode" }
+
+preserve = new WildCard { value = "jode.Decompiler.main.*" },
+           new WildCard { value = "jode.JodeApplet.<init>.()V" },
+           new WildCard { value = "jode.JodeWindow.main.*" },
+           new WildCard { value = "jode.obfuscator.Main.main.*" },
+           new WildCard { value = "jode.swingui.Main.main.*" },
+	   new WildCard { value = "jode.obfuscator.modules.*.<init>.()V" },
+	   new WildCard { value = "jode.obfuscator.modules.*.setOption.*" }
+
+#    value = "jode.Decompiler.main.*", 
+#             "jode.JodeApplet.<init>.()V",
+#             "jode.JodeWindow.main.*",
+#             "jode.obfuscator.Main.main.*",
+#             "jode.swingui.Main.main.*"
+
+analyzer = new SimpleAnalyzer
+post = new LocalOptimizer, new RemovePopAnalyzer

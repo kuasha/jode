@@ -1,0 +1,14 @@
+#!@SHELL@
+prefix=@prefix@
+
+case $1 in
+  [Ss]wi*) CLAZZ=jode.swingui.Main; shift ;;
+  [Dd]ec*) CLAZZ=jode.decompiler.Main; shift ;;
+  [Oo]bf*) CLAZZ=jode.obfuscator.Main; shift ;;
+	*) CLAZZ=jode.decompiler.Main ;;
+esac
+  
+
+CP=`echo $CLASSPATH | sed s/:/,/`
+CLASSPATH=@datadir@/jode-@VERSION@.jar:@CLASSPATH@ \
+@JAVA@ $CLAZZ --classpath $CP $*

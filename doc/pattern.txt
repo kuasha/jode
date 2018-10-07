@@ -1,0 +1,65 @@
+inner classes:
+access methods:
+Method int access$0(jode.test.InnerClass)
+   0 aload_0
+   1 getfield #13 <Field int x>
+   4 ireturn
+
+Method void access$1(jode.test.InnerClass, int)
+   0 aload_0
+   1 iload_1
+   2 putfield #13 <Field int x>
+   5 return
+
+inner class:
+    private final jode.test.InnerClass this$0;
+Constructor
+Method jode.test.InnerClass. Inner(jode.test.InnerClass)
+   0 aload_0
+   1 invokespecial #6 <Method java.lang.Object()>
+   4 aload_0
+   5 aload_1
+   6 putfield #11 <Field jode.test.InnerClass this$0>
+   9 aload_0
+  10 aload_1
+  11 putfield #11 <Field jode.test.InnerClass this$0>
+  14 aload_0
+
+
+
+
+
+.class operator:
+
+usage:
+   0 getstatic #23 <Field java.lang.Class class$Ljava$lang$Object>
+   3 ifnull 12
+   6 getstatic #23 <Field java.lang.Class class$Ljava$lang$Object>
+   9 goto 21
+  12 ldc #25 <String "java.lang.Object">
+  14 invokestatic #21 <Method java.lang.Class class$(java.lang.String)>
+  17 dup
+  18 putstatic #23 <Field java.lang.Class class$Ljava$lang$Object>
+
+or:
+   0 getstatic #13 <Field java.lang.Class class$java$lang$Object>
+   3 ifnonnull 14
+   6 ldc #1 <String "java.lang.Object">
+   8 invokestatic #12 <Method java.lang.Class class$(java.lang.String)>
+  11 putstatic #13 <Field java.lang.Class class$java$lang$Object>
+
+
+Method java.lang.Class class$(java.lang.String)
+   0 aload_0
+   1 invokestatic #39 <Method java.lang.Class forName(java.lang.String)>
+   4 areturn
+   5 astore_1
+   6 new #41 <Class java.lang.NoClassDefFoundError>
+   9 dup
+  10 aload_1
+  11 invokevirtual #47 <Method java.lang.String getMessage()>
+  14 invokespecial #51 <Method java.lang.NoClassDefFoundError(java.lang.String)>
+  17 athrow
+Exception table:
+   from   to  target type
+     0     5     5   <Class java.lang.ClassNotFoundException>

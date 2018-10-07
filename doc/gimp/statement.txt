@@ -1,0 +1,9 @@
+
+  while (i>0) {
+    if (a[i] > max)  
+      max = a[i];
+    if (a[i] == 0)  
+      break;
+    i++; 
+  }
+

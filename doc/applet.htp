@@ -1,0 +1,25 @@
+<section title="The <i>JODE</i> Applet">
+
+<p>Please be patience, loading the applet may take some time.</p>
+
+<center>
+<applet code="jode/Applet.class" archive="jode-applet.jar" width=540 height=400>
+<param name=pagecolor value="ffffff">
+<param name=classpath value="http://jode.sourceforge.net/plasma.jar">
+<param name=class value="PlasmaApplet">
+<p>Sorry you need a java enabled browser to test a java applet ;-)</p>
+<p>Don't read the rest, it only contains information about the applet.</p>
+</applet>
+</center><br>
+
+<p> Press the start button to decompile <a
+href="http://www.informatik.uni-oldenburg.de/~mw/plasma.html">Michael's
+Plasma applet</a> (and give the decompiler some time to download the
+jar file).  </p>
+
+<p>You may change the classpath to point to a zip or jar file of your
+choice.  Unfortunately, your browser will most likely forbid URL's that
+aren't located on jode.sourceforge.net. 
+Save probably doesn't work, because it is forbidden by your browser.</p>
+
+</section>

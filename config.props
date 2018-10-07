@@ -1,0 +1,28 @@
+# Do you have online access for generating javadoc?
+# If not, where are your local files.
+javadoc.offline=false
+javadoc.packagelistLoc=
+javadoc.href=http://java.sun.com/products/jdk/1.2/docs/api/
+#javadoc.href=file:/usr/doc/inet/java/jdk1.2/docs/api
+
+#javadoc.offline=true
+#javadoc.packagelistLoc=/usr/doc/inet/java/jdk1.2/docs/api
+
+# Is Perl installed on your system?
+#
+# perl is needed to reconfigure Jode for JDK-1.1.  If you haven't
+# installed it you can only configure for JDK-1.2 and you should
+# comment out the next line.
+#
+# perl is also used for things that are relevant for the maintainer.
+# 
+# Remove the next line if perl is not installed.
+perl.present=true
+
+# Is HTP installed on your system?
+#
+# htp is needed to generate html files from htp files.
+# see http://htp.sourceforge.net/
+# 
+# Remove the next line if either htp is not installed.
+htp.present=true

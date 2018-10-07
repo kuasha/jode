@@ -1,0 +1,7 @@
+classpath = "."
+load = new WildCard { value = "RemovePopExample" }
+
+preserve = new WildCard { value = "*" }
+
+analyzer = new SimpleAnalyzer
+post = new RemovePopAnalyzer

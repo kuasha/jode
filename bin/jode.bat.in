@@ -1,0 +1,19 @@
+; Use this batch file to make invoking the decompiler easier.
+; Please edit this file and insert correct directories where needed.
+;
+; Usage:  jode dec [decompiler options]
+;         jode swi [swingui options]
+;         jode obf [obfuscator options]
+; Since the decompiler is the most important program you can omit `dec':
+;         jode [decompiler options]
+
+set CLASSPATH=jode-@VERSION@-1.2.jar;%CLASSPATH%
+set PROGGY=default
+
+if %1 == swi set PROGGY=swingui
+if %1 == obf set PROGGY=obfuscator
+if %1 == dec set PROGGY=decompiler
+if NOT %PROGGY% == default shift
+if %PROGGY% == default set PROGGY=decompiler
+
+java jode.%PROGGY%.Main %1 %2 %3 %4 %5 %6 %7 %8 %9

@@ -1,0 +1,9 @@
+
+  21 iconst_4
+  22 iand
+  23 ifne 30
+  26 iconst_0
+  27 goto 31
+  30 iconst_1
+  31 ireturn
+

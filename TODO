@@ -1,0 +1,64 @@
+This is a list of features, that would be nice to have:
+
+Decompiler:
+ - BUG: public final static null fields aren't initialized (leads to compile error)
+ - outline inlined methods.
+ - remove string decrypt method.
+ - remove synthetic methods if and only if all calls to them are resolved.
+ - rename keywords to safe names.
+ ~ handle try catch more thouroughly/safely.
+ ~ decompile jode.jvm.Interpreter (hand optimized bytecode)
+
+Obfuscator:
+ - Detect Class.forName() calls with constant parameters and rename
+   these constants.  Detect class$ methods with constant parameters.
+   Warn about all other occurences of Class.forName()
+ - work around Class.forName, by creating a new version using a hash
+   table that maps md5 sums of old names to obfuscated names.
+
+   This should be put into the constant analyzer.  The simple
+   analyzer should only do the warnings.
+ - Transforming the class hierarchy, e.g. combining two totally
+   unrelated classes together into one class or make some class
+   to implement some interfaces, that it previously didn't.
+ - Doing flow obfuscation, i.e. do some tests, that one knows to 
+   succeed always, and jump to funny position if the test fails.  
+   The tests should use undecidable properties, so that a
+   deobfuscator cannot remove them again.
+
+DeObfuscator:
+ - Deobfuscator should detect inner/anonymous classes and mark them
+   as such.  It should be possible with the renaming table to mark
+   inner classes as well.  Inner classes are easy to detect; there
+   constructor has a special form.  And the information is very
+   useful for the decompiler.
+
+   This should be done with some generalize interface similar to (or
+   instead of) Transformer
+
+ - Deobfuscator should generate nicer names.  This should be a
+   special Renamer.  The renamer should analyze short methods and 
+   call them getXXX, isXXX, setXXX if apropriate, detect synthetic
+   methods and similar.  Class names should be derived from super
+   class or interface (e.g. Enumeration),  fields should be derived
+   from their type, maybe also from their assignments.
+
+   One can build more renamer, each handles some special cases and
+   calls the next one, if it can't handle an identifier.
+ 
+User Interface:
+ - make a nice user interface:
+   ~ list classnames: toggable between class hierarchie/package hierarchie.
+   - list fields/method of selected class.
+   - show decompilation of selected method.
+   - show usage of method/fields.
+ - syntax highlighting, hyper links etc.  
+	(look at java.swing.JEditorPane or at Java Insight)
+ - as a first approximation use HTML code and a JHTMLPane
+ - visual obfuscation/deobfuscation (like klassmaster?, better?)
+
+Internal:
+ - clean up package hierarchy, esp. expr, flow and decompiler.
+ - move to net.sf.jode package.
+ - make the class names more precise, e.g. StructuredBlock is Statement,
+   FlowBlock is BasicBlock.

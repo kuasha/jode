@@ -1,0 +1,90 @@
+<section title="FAQ - Frequently Asked Questions">
+This is a list of some questions that pop up from time to time.
+</section>
+
+<section title="Decompiler issues">
+
+<h3>Does Jode support Java 5?</h3>
+
+<p>It does not support generics/vararg method or the new for loop at
+the moment.  It produces readable code and I think it may even compile
+again.  But it is not compatible as the generics and varargs
+information is not included.</p>
+
+<h3>Jode crashes with ExceptionHandler order failed</h3>
+
+<p>Try jode-1.1.2pre1 or the latest CVS version.  If it still does not
+work rewrite <code>jode.flow.TransformExceptionHandlers</code> and
+send me the fix :) </p>
+
+<p>Since Java 1.4 the format for finally and synchronized blocks
+changed again.  It was always a very difficult task to reconstruct
+<code>finally</code> blocks correctly and the code is huge and very
+hard to maintain.  With Java 5 it gets even worse.</p>
+
+<h3>The decompiler crashes with a VerifyException, what can I do?</h3>
+
+<p>The class isn't verifiable, probably because there is not enough
+information about used classes.  See the question about the
+classpath.</p>
+
+<p>This could also be caused by malicious bytecode, or because there
+is a bug in Jode's verifier, or because Sun decided to change the
+definition of correct bytecode, again.</p>
+
+<h3>What should be included in the classpath?</h3>
+
+<p>Jode needs to know the full class hierarchie to guess the types.
+This includes not only the classes in the program, but also the
+libraries used by the java program, even the Java runtime library.
+You should set the classpath to include all these classes.</p>
+
+<p>If you don't specify the classpath on the command line, Jode uses
+the same as your Java Virtual Machine.</p>
+
+<p>As last resort, if Jode can't find a class in the classpath it uses
+reflection to ask the Virtual Machine.  This works quite well, but
+loading classes can have side effects, e.g. when AWT classes are
+loaded, an AWT thread is created, even though Jode doesn't need
+it.</p>
+
+<h3>Why doesn't Jode decompile my inner class
+<code>MyClass$Inner.class</code>?</h3>
+
+<p>You should decompile the outermost class (<code>MyClass</code> in
+this case).  The produced code contains the inner class.  </p>
+
+</section>
+
+<section title="Obfuscator issues">
+
+<h3>What should be included in the classpath?</h3>
+
+<p>The program, all libraries, the Java runtime library.  Don't omit a
+library even when you don't want to obfuscate it.</p>
+
+<h3>What should I preserve</h3>
+
+<p>The most common mistake is to preserve a class.  In most cases this
+is not what you want.  This only makes sure the class won't be
+renamed, it doesn't prevent it from being stripped.  Instead you
+should preserve methods and constructors.  The constructor is just a
+method with the special name <tt>&lt;init&gt;</tt>. </p>
+
+<p> Another common mistake is to omit the type
+signature, e.g. to preserve <tt>Class.main</tt> instead of
+<tt>Class.main.([Ljava/lang/String;)V</tt>.  That doesn't work.  If
+you don't want to care about the format of the type signature use a
+wildcard as in <tt>Class.main.*</tt>. </p>
+
+<h3>What is a type signature</h3>
+
+<p>The type signature is a machine readable representation of a java
+type that is used all over in java bytecode.  The JDK ships a command
+named <tt>javap</tt>.  With <tt>java -s</tt> you can lists the fields
+and methods of a class with their type signatures.</p>
+
+<p> If you are interested in the format of type signatures read the
+Java Virtual Machine Specification, Chapter 4.3 Descriptors</p>
+
+</section>
